@@ -1,5 +1,5 @@
 # Vault & consul Kubernetes Deployment
-Following this project, you will be able to deploy, configure and use an [HashiCorp Vault](https://www.vaultproject.io/) with [HashCorp Consul](https://www.consul.io/) and try it in your kubernetes Cluster with sample application.
+Following this project, you will be able to deploy, configure and use an [HashiCorp Vault](https://www.vaultproject.io/) with [Hashicorp Consul](https://www.consul.io/) and try it in your kubernetes Cluster with sample application.
 
 <img src="vault.png" width="99%">
 
