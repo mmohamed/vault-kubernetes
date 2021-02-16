@@ -204,7 +204,7 @@ export K8S_CACERT="$(kubectl config view --raw -o go-template="{{ range .cluster
 5. Create Vault policy and role for "myapp"
 
 Edit policy file myapp/policy.json
-```json
+```yaml
 path "kv/myapp/*" {
   capabilities = ["read", "list"]
 }
@@ -236,7 +236,7 @@ kubectl log ${POD} myapp
 ```
 
 
-## 7- Tips
+## 8- Tips
 To activate an HTTP Basic security for Consul UI (it's run without), you can use Nginx ingress annotations,
 after authentication secret generation.
 ```bash
