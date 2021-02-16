@@ -1,0 +1,88 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: consul
+spec:
+  selector:
+    matchLabels:
+      app: consul
+      role: server
+  serviceName: consul
+  podManagementPolicy: "Parallel"
+  replicas: 3
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: consul
+        role: server
+    spec:
+      serviceAccountName: consul
+      securityContext:
+        fsGroup: 1000
+      containers:
+      - name: consul-server
+        image: consul:1.9.3
+        env:
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: GOSSIP_ENCRYPTION_KEY
+            valueFrom:
+              secretKeyRef:
+                name: consul
+                key: gossip-encryption-key
+        args:
+          - "agent"
+          - "-advertise=$(POD_IP)"
+          - "-bootstrap-expect=3"
+          - "-config-file=/etc/consul/config/config.json"
+          - "-encrypt=$(GOSSIP_ENCRYPTION_KEY)"
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - ps aux | grep consul
+          initialDelaySeconds: 5
+          timeoutSeconds: 2
+        readinessProbe:
+          httpGet:
+            path: /v1/status/peers
+            port: 8500
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+        ports:
+        - containerPort: 8500
+          name: api
+        - containerPort: 8600
+          name: dns-udp
+          protocol: UDP
+        - containerPort: 8600
+          name: dns-tcp
+          protocol: TCP
+        volumeMounts:
+        - name: consul-config
+          mountPath: /etc/consul/config
+        - name: consul-data
+          mountPath: /consul/data
+        - name: consul-tls
+          mountPath: /etc/tls
+      volumes:
+      - name: consul-config
+        configMap:
+          name: consul-config
+      - name: consul-tls
+        secret:
+          secretName: consul
+  volumeClaimTemplates:
+  - metadata:
+      name: consul-data
+    spec:
+      accessModes: [ ReadWriteOnce ]
+      resources:
+        requests:
+          storage: 500Mi

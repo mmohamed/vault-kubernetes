@@ -1,0 +1,37 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vault-config
+data:
+  vault.config: |
+    {
+      "ui": true,
+      "listener": [{
+        "tcp": {
+          "address": "0.0.0.0:8200",
+          "tls_disable": true
+        }
+      }],
+      "storage": [{
+        "consul": {
+          "address": "localhost:8500",
+          "schema": "http",
+          "path": "vault"
+        }
+      }]
+    }
+  concul.config: |
+    {
+      "verify_incoming": false,
+      "verify_outgoing": true,
+      "server": false,
+      "ca_file": "/etc/tls/ca.pem",
+      "cert_file": "/etc/tls/client-vault.pem",
+      "datacenter": "vault",
+      "key_file": "/etc/tls/client-vault-key.pem",
+      "client_addr": "127.0.0.1",
+      "ui": false,
+      "raft_protocol": 3,
+      "retry_join": [ "provider=k8s label_selector=\"app=consul,role=server\" namespace=\"vault\"" ]
+    }

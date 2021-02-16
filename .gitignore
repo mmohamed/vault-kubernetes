@@ -1,0 +1,6 @@
+/**/*.pem
+/**/*.csr
+auth
+ingress.yaml
+/bin/*
+.env

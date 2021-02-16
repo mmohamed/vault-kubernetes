@@ -1,0 +1,3 @@
+path "kv/myapp/*" {
+  capabilities = ["read", "list"]
+}

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+  labels:
+    app: myapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-secret-account: "kv/myapp/config"
+        vault.hashicorp.com/agent-inject-template-account: |
+          {{- with secret "kv/myapp/config" -}}
+          dsn://{{ .Data.username }}:{{ .Data.password }}@database:port/mydb?sslmode=disable
+          {{- end }}
+        vault.hashicorp.com/role: "myapp-role"
+      labels:
+        app: myapp
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+                - arm64
+      serviceAccountName: vault-auth
+      containers:
+      - name: myapp
+        image: busybox
+        command: ['sh', '-c', 'cat /vault/secrets/account && sleep 300']

@@ -1,0 +1,31 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vault-ui
+spec:
+  type: ClusterIP
+  ports:
+    - name: ui
+      targetPort: 8200
+      port: 80
+      protocol: TCP
+  selector:
+    app: vault
+    role: server
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vault
+spec:
+  ports:
+    - name: api
+      port: 8200
+    - name: rpc
+      port: 8201
+  clusterIP: None
+  selector:
+    app: vault
+    role: server

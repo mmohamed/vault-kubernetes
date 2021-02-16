@@ -1,0 +1,77 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vault
+  labels:
+    app: vault
+    role: server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vault
+      role: server
+  template:
+    metadata:
+      labels:
+        app: vault
+        role: server
+    spec:
+      # must be delete 
+      serviceAccountName: consul
+      containers:
+      - name: vault
+        image: vault:1.6.2
+        securityContext:
+          capabilities:
+            add: [ "IPC_LOCK" ]
+        env:
+        - name: VAULT_LOCAL_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: vault-config
+              key: vault.config
+        args: [ "server" ]
+        livenessProbe:
+          exec:
+            command:
+            - pidof
+            - vault
+          initialDelaySeconds: 5
+          timeoutSeconds: 2
+        ports:
+        - containerPort: 8200
+          name: api
+      - name: consul-client
+        image: consul:1.9.3
+        args: [ "agent", "-config-file", "/etc/consul/config/client.json", "-encrypt=$(GOSSIP_ENCRYPTION_KEY)"]
+        env:
+          - name: GOSSIP_ENCRYPTION_KEY
+            valueFrom:
+              secretKeyRef:
+                name: client-vault
+                key: gossip-encryption-key
+        livenessProbe:
+          exec:
+            command:
+            - pidof
+            - consul
+          initialDelaySeconds: 5
+          timeoutSeconds: 2
+        ports:
+        - containerPort: 8500
+          name: api
+        volumeMounts:
+        - name: vault-config
+          subPath: concul.config 
+          mountPath: /etc/consul/config/client.json
+        - name: consul-tls
+          mountPath: /etc/tls
+      volumes:
+      - name: vault-config
+        configMap:
+          name: vault-config
+      - name: consul-tls
+        secret:
+          secretName: client-vault
