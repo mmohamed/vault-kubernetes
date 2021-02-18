@@ -1,5 +1,5 @@
-# Vault & consul Kubernetes Deployment
-Following this project, you will be able to deploy, configure and use an [HashiCorp Vault](https://www.vaultproject.io/) with [Hashicorp Consul](https://www.consul.io/) and try it in your kubernetes Cluster with sample application.
+# Vault & Consul Kubernetes Deployment
+Following this project, you will be able to deploy, configure and use an [HashiCorp Vault](https://www.vaultproject.io/) with [Hashicorp Consul](https://www.consul.io/) and try it in your Kubernetes Cluster with sample application.
 
 <img src="vault.png" width="99%">
 
@@ -7,7 +7,7 @@ Following this project, you will be able to deploy, configure and use an [HashiC
 
 <img src="consul.png" width="99%">
 
-> Consul is a service mesh solution providing a full featured control plane with service discovery, configuration, and segmentation functionality. Each of these features can be used individually as needed, or they can be used together to build a full service mesh
+> Consul is a service mesh solution providing a full featured control plane with service discovery, configuration, and segmentation functionality. Each of these features can be used individually as needed, or they can be used together to build a full-service mesh
 
 
 ## 1- Stack :
@@ -21,10 +21,10 @@ Following this project, you will be able to deploy, configure and use an [HashiC
 * Architecture : **AMD64 / ARM64**
 
 ## 2- Consul deployment :
-1. First, generate SSL certificates for Consul (can be done in workstation) with [Cfssl](https://cfssl.org/), after editiing configuration files in [consul/ca](consul/ca) directory
+1. First, generate SSL certificates for Consul (can be done in workstation) with [Cfssl](https://cfssl.org/), after editing configuration files in [consul/ca](consul/ca) directory
 
 ```bash
-# Generate CA ans sign request for Consul
+# Generate CA and sign request for Consul
 cfssl gencert -initca ca/ca-csr.json | cfssljson -bare ca
 # Generate SSL certificates for Consul
 cfssl gencert \
@@ -33,11 +33,11 @@ cfssl gencert \
 -config=ca/ca-config.json \
 -profile=default \
 ca/consul-csr.json | cfssljson -bare consul
-# Perpare a GISSIP key for Consul members communiction encryptation
+# Perpare a GOSSIP key for Consul members communication encryptation
 GOSSIP_ENCRYPTION_KEY=$(consul keygen)
 ```
 
-2. Create secret with gossip key and public/private keys
+2. Create secret with Gossip key and public/private keys
 ```bash
 kubectl create secret gesneric consul \
 --from-literal="gossip-encryption-key=${GOSSIP_ENCRYPTION_KEY}" \
@@ -74,7 +74,7 @@ kubectl create secret generic client-vault \
 ```
 
 ## 3- Vault deployment :
-Before deploy Vaul, e nned to configure a Consul client to give Vault access to Consul members
+Before deploy Vault, you need to configure a Consul client to give Vault access to Consul members
 ```yaml
 apiVersion: v1
 kind: ConfigMap
@@ -97,7 +97,7 @@ data:
       "retry_join": [ "provider=k8s label_selector=\"app=consul,role=server\" namespace=\"vault\"" ]
     }
 ```
-The consul client will be deployed as a Sidecar for Vault server, so the ***"client_addr"*** must be ***"127.0.0.1"***. For certficates parameters, we will use the *client-vault* secret and same join expression of memberes configuration.
+The consul client will be deployed as a Sidecar for Vault server, so the ***"client_addr"*** must be ***"127.0.0.1"***. For certificates parameters, we will use the *client-vault* secret and same join expression of members configuration.
 
 In another side, we need to configure Vault to request this client by the ***"listeners"*** parameter.
 ```yaml
@@ -125,9 +125,9 @@ kubectl apply -f vault/vault.yaml
 ```
 
 ## 5- UI:
-A this point, we have 3 instance on Consul deployed and 1 instance of Vault connected to Consul members.
+At this point, we have 3 instances on Consul deployed and 1 instance of Vault connected to Consul members.
 
-We can use a port forwarding to acces UI of Consul and Vault. In this case, we will to use an ***"Ingress"*** to expose UIs to internet.
+We can use a port forwarding to acces UI of Consul and Vault. In our case, we will use an ***"Ingress"*** to expose UIs to internet.
 
 ```bash
 kubectl apply -f ingress.yaml
@@ -143,18 +143,18 @@ kubectl apply -f vault-injector/deployment.yaml
 kubectl apply -f vault-injector/webhook.yaml # webhook must be created after deployment
 ```
 
-> The injector will dected Vault an ***"Annotation"*** or a ***"Configmap"***, and will inject an ***initContainer*** in init process of your application Pod to request vault for secret. After initialisation, an agent will be injected inside the pod to give your application container the requested secret.
+> The injector will detect Vault  ***"Annotation"*** or ***"Configmap"***, and will inject an ***initContainer*** in the init process of your application Pod to request Vault server for secret. After initialization, an agent will be injected inside the pod to give your application container the requested secret.
 
-> For agent injector, we use own [docker image](https://hub.docker.com/repository/docker/medinvention/kubernetes-vault), it's similaire of offical image but support arm64 (At 02/2021 only amd64 arch are distributed by hashicorp), see [docker files](docker/).
+> For agent injector, we will use our [docker image](https://hub.docker.com/repository/docker/medinvention/kubernetes-vault), it's similar of official image with arm64 supporting (At 02/2021 only amd64 arch are distributed by Hashicorp), see [docker files](docker/).
 
 ## 7- Sample deployment :
 We can use UI to configure and use Vault, in this project we use CLI.
-1. Start by installing vault locally (in workspace) for CLI use only
+1. Start by installing vVult locally (in workspace) for CLI use only
 ```bash
 curl https://releases.hashicorp.com/vault/1.6.2/vault_1.6.2_linux_amd64.zip -o vault_1.6.2_linux_amd64.zip
 unzip vault_1.6.2_linux_amd64.zip
 chmod +x vault
-# With ingress, you can use the root url of vault ui, or use the port forward
+# With ingress, you can use the root url of Vault ui, or use the port forward
 export VAULT_ADDR="YOUR_VAULT_HOST"
 ```
 
@@ -186,7 +186,7 @@ export VAULT_ADDR="YOUR_VAULT_HOST"
 ./vault kv put kv/myapp/config username="admin" password="adminpassword"
 ```
 
-4. Connect kube to vault
+4. Connect Kube to Vault
 ```bash
 # Create the service account to access secret
 kubectl apply -f myapp/service-account.yaml
