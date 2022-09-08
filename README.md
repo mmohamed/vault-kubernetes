@@ -39,7 +39,7 @@ GOSSIP_ENCRYPTION_KEY=$(consul keygen)
 
 2. Create secret with Gossip key and public/private keys
 ```bash
-kubectl create secret gesneric consul \
+kubectl create secret generic consul \
 --from-literal="gossip-encryption-key=${GOSSIP_ENCRYPTION_KEY}" \
 --from-file=ca.pem \
 --from-file=consul.pem \
@@ -149,7 +149,7 @@ kubectl apply -f vault-injector/webhook.yaml # webhook must be created after dep
 
 ## 7- Sample deployment :
 We can use UI to configure and use Vault, in this project we use CLI.
-1. Start by installing vVult locally (in workspace) for CLI use only
+1. Start by installing Vault locally (in workspace) for CLI use only
 ```bash
 curl https://releases.hashicorp.com/vault/1.6.2/vault_1.6.2_linux_amd64.zip -o vault_1.6.2_linux_amd64.zip
 unzip vault_1.6.2_linux_amd64.zip
